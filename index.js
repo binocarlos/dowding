@@ -39,7 +39,7 @@ tape('leastBusy returns one server', function(t){
   })
 })
 
-tape('pin and check allocate returns correct server', function(t){
+tape('pin and unpin', function(t){
 
   function runPinTest(node, done){
     scheduler.pin('apples', node, function(err){
@@ -50,10 +50,25 @@ tape('pin and check allocate returns correct server', function(t){
       }
       setTimeout(function(){
         scheduler.isPinned('apples', function(err, server){
+          if(err){
+            t.fail(err, 'isPinned apples to ' + node)
+            t.end()
+            return
+          }
           t.equal(server.hostname, node, 'the pinned hostname is correct')
           scheduler.unpin('apples', function(err){
+            if(err){
+              t.fail(err, 'unpin apples to ' + node)
+              t.end()
+              return
+            }
             setTimeout(function(){
               scheduler.isPinned('apples', function(err, server){
+                if(err){
+                  t.fail(err, 'isPinned blank to ' + node)
+                  t.end()
+                  return
+                }
                 t.notOK(server, 'there is no server')
                 setTimeout(done, 100)
               })
@@ -71,4 +86,54 @@ tape('pin and check allocate returns correct server', function(t){
       })
     })
   })
+})
+
+
+tape('services', function(t){
+
+  scheduler.addService('peaches', {
+    color:'red'
+  }, function(err){
+    if(err){
+      t.fail(err, 'add peaches service')
+      t.end()
+      return
+    }
+    scheduler.addService('pears', {
+      color:'green'
+    }, function(err){
+      if(err){
+        t.fail(err, 'add pears service')
+        t.end()
+        return
+      }
+      scheduler.listServices(function(err, list){
+        if(err){
+          t.fail(err, 'list services error')
+          t.end()
+          return
+        }
+        t.equal(list.length, 2, '2 services returned')
+        scheduler.removeService('pears', function(err){
+          if(err){
+            t.fail(err, 'remove pears service')
+            t.end()
+            return
+          }
+          scheduler.listServices(function(err, list){
+            if(err){
+              t.fail(err, 'list services error')
+              t.end()
+              return
+            }
+            t.equal(list.length, 1, '1 services returned')
+            t.equal(list[0].id, 'pears', 'service id is pears')
+            t.equal(list[0].job.color, 'green', 'service color is green')
+            t.end()
+          })
+        })
+      })
+    })
+  })
+
 })
