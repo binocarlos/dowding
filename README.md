@@ -25,32 +25,28 @@ var scheduler = dowding({
 	etcd:'192.168.8.120:4001,192.168.8.121:4001,192.168.8.122:4001',
 	
 	// the key in etcd under which dowding will keep state
-	baseKey:'/schedule'
+	baseKey:'/schedule',
 
-})
-```
+	// pass a function that will list our inventory
+	inventory:function(done){
 
-#### inventory
+		// the inventory is an array of objects
+		// each object has 'hostname' and 'docker' properties
+		// servers can also have arbitrary meta data
 
-Now we have a scheduler, we can define a function that will list our inventory of docker servers
+		var servers = [{
+			hostname:'host1',
+			docker:'192.168.8.120:2375',
+			tags:'apple,peach'
+		},{
+			hostname:'host2',
+			docker:'192.168.8.121:2375',
+			tags:'orange'
+		}]
 
-```js
-scheduler.inventory(function(done){
+		done(null, servers)
+	}
 
-	// the inventory is an array of objects
-	// each object has 'hostname' and 'docker' properties
-	// servers can also have arbitrary meta data
-	var servers = [{
-		hostname:'host1',
-		docker:'192.168.8.120:2375',
-		tags:'apple,peach'
-	},{
-		hostname:'host2',
-		docker:'192.168.8.121:2375',
-		tags:'orange'
-	}]
-
-	done(null, servers)
 })
 ```
 
