@@ -1,0 +1,25 @@
+{
+  "name": "dowding",
+  "version": "0.0.1",
+  "description": "Master planner - docker cluster scheduler backed by etcd",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/binocarlos/dowding.git"
+  },
+  "keywords": [
+    "planner",
+    "scheduler",
+    "docker",
+    "etcd"
+  ],
+  "author": "Kai Davenport",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/binocarlos/dowding/issues"
+  },
+  "homepage": "https://github.com/binocarlos/dowding"
+}
