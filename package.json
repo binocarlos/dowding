@@ -23,9 +23,10 @@
   },
   "homepage": "https://github.com/binocarlos/dowding",
   "devDependencies": {
+    "async": "^0.9.0",
     "tape": "^2.14.0"
   },
   "dependencies": {
-    "etcdjs": "^1.1.1"
+    "dockers-ps": "^1.0.0"
   }
 }

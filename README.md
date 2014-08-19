@@ -100,6 +100,12 @@ scheduler.allocate(function(err, server){
 })
 ```
 
+#### parent
+
+You can instruct dowding to allocate a container onto a server that another container is running.
+
+This is useful in scenarios like `--volumes-from` where one container has a local dependency on another.
+
 #### least-busy
 
 When the above rules are not applied - the default behaviour is to pick the `least busy` server.
@@ -123,8 +129,24 @@ Allocate a docker server for a job
 
 Opts is an optional object used to filter the allocation - it has these keys:
 
- * name - the name of the job, possibly in <job>.<pid> format
- * volumesFrom - allocate this job to the server that the volumesFrom job is running
+ * name - the name of the container, possibly in <job>.<pid> format for mutual exclusion
+ * parent - the name of a parent container - the job will be routed to the server it is running on
+
+#### `scheduler.find(name, function(err, server){})
+
+Find which server that a container is running - server can be null if the container is not found.
+
+#### `scheduler.remove(name, function(err, server){})
+
+Call this to unallocate a container - the server that it is running on is returned (null if the container is not found).
+
+The main point of calling this is to trigger the `unallocate` event to update state.
+
+## events
+
+#### `scheduler.on('allocate', function(job, server){})`
+
+Triggered when a job is allocated to a server - this can be used to save state in the cluster.
 
 ## license
 

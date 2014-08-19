@@ -1,6 +1,7 @@
 var cp = require('child_process')
-var dowding = require('../')
+var dowding = require('./')
 var tape     = require('tape')
+var async = require('async')
 
 var allServers = [{
   hostname:'node1',
@@ -12,6 +13,7 @@ var allServers = [{
   hostname:'node3',
   docker:'192.168.8.122:2375'
 }]
+
 var jobs = ['dowdingtest.1', 'dowdingtest.2', 'dowdingtest.3']
 
 var scheduler = dowding({
@@ -20,20 +22,6 @@ var scheduler = dowding({
   }
 })
 
-tape('reset etcd keys', function(t){
-  etcd.del(baseKey, {
-    recursive:true
-  }, function(){
-    t.end()
-  })
-})
-
-tape('leastBusy returns one server', function(t){
-  scheduler.leastBusy(function(err, server){
-    t.ok(server.hostname.indexOf('node')==0, 'server has hostname')
-    t.end()
-  })
-})
 
 function getTestCommand(name, server){
   return 'docker -H tcp://' + server + ' run --name ' + name + ' -d binocarlos/bring-a-ping --timeout 1000'
@@ -76,6 +64,14 @@ function killExclusion(done){
     done()
   })
 }
+
+
+tape('leastBusy returns one server', function(t){
+  scheduler.leastBusy(function(err, server){
+    t.ok(server.hostname.indexOf('node')==0, 'server has hostname')
+    t.end()
+  })
+})
 
 tape('mutual exclusion', function(t){
 
