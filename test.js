@@ -156,6 +156,16 @@ tape('parents', function(t){
   })
 })
 
+
+tape('non existent parents', function(t){
+  scheduler.allocate({
+    parent:'doesnotexist'
+  }, function(err, server){
+    t.equal(err, 'no container: doesnotexist')
+    t.end()
+  })
+})
+
 tape('cleanup exclusions', function(t){
 
   killExclusion(function(){

@@ -81,7 +81,7 @@ Dowding.prototype.allocate = function(opts, done){
 	if(opts.parent){
 		self.findParent(opts.parent, function(err, parent){
 			if(err || !parent){
-				return done(err || 'no container: ' + opts.parent + ' found')
+				return done(err || 'no container: ' + opts.parent)
 			}
 			done(null, parent)
 		})
