@@ -27,6 +27,7 @@
     "tape": "^2.14.0"
   },
   "dependencies": {
-    "dockers-ps": "^1.0.0"
+    "dockers-ps": "^1.0.0",
+    "shuffle-array": "0.0.0"
   }
 }

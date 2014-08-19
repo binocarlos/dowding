@@ -89,6 +89,10 @@ Dowding.prototype.allocate = function(opts, done){
 	// this is a mutual exclusion
 	else if(opts.name.indexOf('.')>0){
 		self.filterExclusion(opts.name, function(err, servers){
+			if(err) return done(err)
+			if(Object.keys(servers || {}).length<=0){
+				return done('no server found')
+			}
 			self._leastBusy(servers, done)
 		})
 	}

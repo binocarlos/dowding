@@ -91,19 +91,45 @@ tape('mutual exclusion', function(t){
 
   function nextTest(){
     counter++
-    if(counter<=1){
+    if(counter<=10){
       runExclusion(t, function(err, allocations){
 
-        console.log('-------------------------------------------');
-        console.dir(allocations)
-        process.exit()
+        var servers = {
+          node1:0,
+          node2:0,
+          node3:0
+        }
+
+        Object.keys(allocations || {}).forEach(function(key){
+          var allocation = allocations[key]
+          servers[allocation.hostname]++
+        })
+
+        t.equal(servers.node1, 1, 'one job allocated to node1')
+        t.equal(servers.node2, 1, 'one job allocated to node2')
+        t.equal(servers.node3, 1, 'one job allocated to node3')
+
         killExclusion(function(){
           nextTest()
         })
       })
     }
     else{
-      t.end()
+
+      // now try a 4th job which should error
+      runExclusion(t, function(err, allocations){
+
+        scheduler.allocate({
+          name:'dowdingtest.4'
+        }, function(err, server){
+          t.equal(err, 'no server found', 'no space for 4th job')
+          killExclusion(function(){
+            t.end()
+          })
+        })
+        
+      })
+      
     }
   }
 
