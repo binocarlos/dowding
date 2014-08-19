@@ -66,15 +66,13 @@ function killExclusion(done){
   })
 }
 
-/*
+
 tape('leastBusy returns one server', function(t){
   scheduler.leastBusy(function(err, server){
     t.ok(server.hostname.indexOf('node')==0, 'server has hostname')
     t.end()
   })
 })
-*/
-
 
 tape('cleanup exclusions', function(t){
 
@@ -134,6 +132,28 @@ tape('mutual exclusion', function(t){
   }
 
   nextTest()
+})
+
+tape('parents', function(t){
+  runExclusion(t, function(err, allocations){
+    async.forEachSeries(jobs, function(job, next){
+      scheduler.allocate({
+        parent:job
+      }, function(err, server){
+        if(err) return next(err)
+        var allocation = allocations[job]
+        t.equal(allocation.hostname, server.hostname, allocation.hostname + ' = ' + server.hostname)
+        next()
+      })
+    }, function(err){
+      if(err){
+        t.fail(err, 'parents')
+        t.end()
+        return
+      }
+      t.end()
+    })
+  })
 })
 
 tape('cleanup exclusions', function(t){
