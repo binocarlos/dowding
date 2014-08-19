@@ -49,15 +49,37 @@ var scheduler = dowding({
 })
 ```
 
-## allocating
+To allocate a new container:
 
-When a new container wants to be run - we must pick a server for it to run on.
+```js
+scheduler.allocate({
+	name:'myjob'
+}, function(err, server){
+	// server is an entry from our inventory	
+})
+```
 
-There are a few rules Dowding will follow when making this decision:
+Allocate a server that does not run another 'myjob' container (mutual exclusion):
 
-#### volumes-from
+```js
+scheduler.allocate({
+	name:'myjob.2'
+}, function(err, server){
+	// server will not be where myjob.1 is running
+})
+```
 
-If a container has volumes-from then it will be routed to the server that hosts the targeted container.
+Allocate the server that is running the `basevolume` container:
+
+```js
+scheduler.allocate({
+	name:'mydatabase',
+	parent:'basevolume'
+}, function(err, server){
+	// server will be the same as where basevolume is running
+	// it will pass an error if basevolume is not found
+})
+```
 
 #### mutual exclusion
 
@@ -108,11 +130,19 @@ This is useful in scenarios like `--volumes-from` where one container has a loca
 
 #### least-busy
 
-When the above rules are not applied - the default behaviour is to pick the `least busy` server.
+When there are multiple servers that could be choosen - the default behaviour is to pick the `least busy` server.
 
 Least busy is determined by the number of containers running on each host.
 
 You can pass a function to override this decision.
+
+The function will be passed an object where the keys are the server hostname and the values are objects with the following properties:
+
+ * hostname
+ * docker
+ * jobs
+
+You can use this information to decide which server should be allocated.
 
 ## api
 
@@ -135,18 +165,6 @@ Opts is an optional object used to filter the allocation - it has these keys:
 #### `scheduler.find(name, function(err, server){})
 
 Find which server that a container is running - server can be null if the container is not found.
-
-#### `scheduler.remove(name, function(err, server){})
-
-Call this to unallocate a container - the server that it is running on is returned (null if the container is not found).
-
-The main point of calling this is to trigger the `unallocate` event to update state.
-
-## events
-
-#### `scheduler.on('allocate', function(job, server){})`
-
-Triggered when a job is allocated to a server - this can be used to save state in the cluster.
 
 ## license
 

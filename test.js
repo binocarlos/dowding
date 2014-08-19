@@ -80,12 +80,8 @@ tape('mutual exclusion', function(t){
 
   function nextTest(){
     counter++
-    if(counter<=10){
+    if(counter<=1){
       runExclusion(t, function(err, allocations){
-
-        console.log('-------------------------------------------');
-        console.dir(allocations)
-        process.exit()
         killExclusion(function(){
           nextTest()
         })
