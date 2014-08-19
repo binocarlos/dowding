@@ -21,5 +21,11 @@
   "bugs": {
     "url": "https://github.com/binocarlos/dowding/issues"
   },
-  "homepage": "https://github.com/binocarlos/dowding"
+  "homepage": "https://github.com/binocarlos/dowding",
+  "devDependencies": {
+    "tape": "^2.14.0"
+  },
+  "dependencies": {
+    "etcdjs": "^1.1.1"
+  }
 }

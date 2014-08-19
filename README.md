@@ -1,7 +1,7 @@
 dowding
 =======
 
-Master planner - docker cluster scheduler backed by etcd
+Docker cluster scheduler
 
 ![Battle Of Britain Ops Room](https://github.com/binocarlos/dowding/raw/master/opsroom.jpg)
 
@@ -15,18 +15,10 @@ $ npm install dowding
 
 ## usage
 
-The job of dowding is to pick and log servers for jobs to run on.
-
 ```js
 var dowding = require('dowding')
 
 var scheduler = dowding({
-	// pass multiple etcd endpoints using commas or an array
-	etcd:'192.168.8.120:4001,192.168.8.121:4001,192.168.8.122:4001',
-	
-	// the key in etcd under which dowding will keep state
-	baseKey:'/schedule',
-
 	// pass a function that will list our inventory
 	inventory:function(done){
 
@@ -45,83 +37,94 @@ var scheduler = dowding({
 		}]
 
 		done(null, servers)
+	},
+
+	leastBusy:function(servers, done){
+
+		// this is a naive function that always returns the first server
+		// you can have any logic you want here
+		done(null, servers[0])
 	}
 
 })
 ```
 
-#### allocating
+## allocating
 
-The most basic usage is to get the server that is least busy (TBC! currently its just random):
+When a new container wants to be run - we must pick a server for it to run on.
+
+There are a few rules Dowding will follow when making this decision:
+
+#### volumes-from
+
+If a container has volumes-from then it will be routed to the server that hosts the targeted container.
+
+#### mutual exclusion
+
+If a container has a name of the following format:
+
+```
+<jobname>.<pid>
+```
+
+For example:
+
+```
+auth.abc
+```
+
+and
+
+```
+auth.xyz
+```
+
+These 2 auth containers will not be allocated onto the same server.
+
+Here is an example of running the allocation:
 
 ```js
-scheduler.leastBusy(function(err, server){
-	// server is an object from the inventory
+scheduler.allocate({
+	name:'auth.abc',
+	volumesFrom:'otherjob'
+}, function(err, server){
+	// server is one object from the inventory
 })
 ```
 
-For general usage you want to either route a job to its pinned location or to allocate a new server if its not pinned - the 'allocate' function does that:
+If you just want a server you can omit the filter information:
 
 ```js
-scheduler.allocate(id, function(err, server){
-	// server is an object from the inventory
-	// if the job was pinned then the answer is pre-determined
+scheduler.allocate(function(err, server){
+	// server is one object from the inventory
 })
 ```
 
-#### pinning
+#### least-busy
 
-When using things like docker volumes, its useful to 'pin' a job to a server.
+When the above rules are not applied - the default behaviour is to pick the `least busy` server.
 
-Pinning a job (by its id) means fixing its location so next time we run the same job it will end up on the same box as its volume.
+Least busy is determined by the number of containers running on each host.
 
-```js
-// server is the hostname of the server to pin to
-scheduler.pin(id, serverHostname, function(err){
-	// id is now pinned to serverHostname
-})
+You can pass a function to override this decision.
 
-// remove the pinned location of a job (in case of failure)
-scheduler.unpin(id, function(err){
-	
-})
+## api
 
-// you can ask the scheduler if a job has been pinned (and where that is)
-scheduler.isPinned(id, function(err, server){
-	// server is an object from the inventory
-})
-```
+#### `var scheduler = dowding(opts)`
 
-You can also pin a job to where another job is - this is useful for volumes-from:
+Create a new scheduler passing the following options:
 
-```js
-// targetid is the id of the job to pin to
-scheduler.pinTo(id, targetid, function(err){
-	// id is routed to whereever targetid is living
-})
-```
+ * inventory - a function that will return a list of servers on our network
+ * leastBusy - a function that defines the logic for picking the least busy of our servers
 
-#### services
+#### `scheduler.allocate([opts], function(err, server){})
 
-Services are jobs that should stay running - by telling dowding about services you are able to fetch the desired and actual state.
+Allocate a docker server for a job
 
-```js
-// add a service to the scheduler by passing the id and job description
-// this means we can get a list of desired and current state
-scheduler.addService(id, job, function(err){
+Opts is an optional object used to filter the allocation - it has these keys:
 
-})
-
-// remove a service from the scheduler
-scheduler.removeService(id, function(err){
-
-})
-
-// list all services
-scheduler.listServices(function(err){
-
-})
-```
+ * name - the name of the job, possibly in <job>.<pid> format
+ * volumesFrom - allocate this job to the server that the volumesFrom job is running
 
 ## license
 
