@@ -107,8 +107,7 @@ Here is an example of running the allocation:
 
 ```js
 scheduler.allocate({
-	name:'auth.abc',
-	volumesFrom:'otherjob'
+	name:'auth.abc'
 }, function(err, server){
 	// server is one object from the inventory
 })
@@ -153,7 +152,7 @@ Create a new scheduler passing the following options:
  * inventory - a function that will return a list of servers on our network
  * leastBusy - a function that defines the logic for picking the least busy of our servers
 
-#### `scheduler.allocate([opts], function(err, server){})
+#### `scheduler.allocate([opts], function(err, server){})`
 
 Allocate a docker server for a job
 
@@ -162,7 +161,7 @@ Opts is an optional object used to filter the allocation - it has these keys:
  * name - the name of the container, possibly in <job>.<pid> format for mutual exclusion
  * parent - the name of a parent container - the job will be routed to the server it is running on
 
-#### `scheduler.find(name, function(err, server){})
+#### `scheduler.find(name, function(err, server){})`
 
 Find which server that a container is running - server can be null if the container is not found.
 
