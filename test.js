@@ -41,6 +41,7 @@ function runExclusion(t, done){
       cp.exec(command, function(err, stdout, stderr){
         if(stderr) err = stderr.toString()
         if(err) return nextJob(err)
+        nextJob()
       })
     })
   }, function(err){
@@ -65,12 +66,22 @@ function killExclusion(done){
   })
 }
 
-
+/*
 tape('leastBusy returns one server', function(t){
   scheduler.leastBusy(function(err, server){
     t.ok(server.hostname.indexOf('node')==0, 'server has hostname')
     t.end()
   })
+})
+*/
+
+
+tape('cleanup exclusions', function(t){
+
+  killExclusion(function(){
+    t.end()
+  })
+  
 })
 
 tape('mutual exclusion', function(t){
@@ -82,6 +93,10 @@ tape('mutual exclusion', function(t){
     counter++
     if(counter<=1){
       runExclusion(t, function(err, allocations){
+
+        console.log('-------------------------------------------');
+        console.dir(allocations)
+        process.exit()
         killExclusion(function(){
           nextTest()
         })
@@ -93,4 +108,12 @@ tape('mutual exclusion', function(t){
   }
 
   nextTest()
+})
+
+tape('cleanup exclusions', function(t){
+
+  killExclusion(function(){
+    t.end()
+  })
+  
 })

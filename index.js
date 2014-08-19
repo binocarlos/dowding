@@ -1,11 +1,14 @@
 var EventEmitter = require('events').EventEmitter
 var util = require('util')
 var dockersps = require('dockers-ps')
+var shuffle = require('shuffle-array')
 
 function leastBusyFrom(servers){
 	var lowestCount = -1
 	var serverkey = null
-	Object.keys(servers || {}).forEach(function(key){
+	var serverKeys = Object.keys(servers || {})
+	shuffle(serverKeys)
+	serverKeys.forEach(function(key){
 		var server = servers[key]
 		var jobs = server.jobs
 		if(lowestCount<0 || jobs.length<lowestCount){
@@ -13,7 +16,7 @@ function leastBusyFrom(servers){
 			serverkey = key
 		}
 	})
-	var server = collection.servers[serverkey]
+	var server = servers[serverkey]
 	return {
 		hostname:server.hostname,
 		docker:server.docker
@@ -51,10 +54,9 @@ Dowding.prototype.filterExclusion = function(name, done){
 				hotServers[collection.names[key]] = true
 			}
 		})
-
 		var finalMap = {}
 		Object.keys(collection.servers || {}).forEach(function(key){
-			if(!hotServers){
+			if(!hotServers[key]){
 				finalMap[key] = collection.servers[key]
 			}
 		})
