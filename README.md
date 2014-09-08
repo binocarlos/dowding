@@ -143,6 +143,8 @@ The function will be passed an object where the keys are the server hostname and
 
 You can use this information to decide which server should be allocated.
 
+If you have [cadvisor](https://github.com/google/cadvisor) running on your hosts - you could use [cluster-advisor](https://github.com/binocarlos/cluster-advisor) to decide on the least-busy server by memory or cpu utilization.
+
 ## api
 
 #### `var scheduler = dowding(opts)`
